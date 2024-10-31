@@ -4,7 +4,7 @@
 #include "io.h"
 
 void gotoxy(POSITION pos) {
-	COORD coord = { pos.column, pos.row }; // Çà, ¿­ ¹İ´ë·Î Àü´Ş
+	COORD coord = { pos.column, pos.row }; // í–‰, ì—´ ë°˜ëŒ€ë¡œ ì „ë‹¬
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
@@ -21,15 +21,15 @@ void printc(POSITION pos, char ch, int color) {
 }
 
 KEY get_key(void) {
-	if (!_kbhit()) {  // ÀÔ·ÂµÈ Å°°¡ ÀÖ´ÂÁö È®ÀÎ
+	if (!_kbhit()) {  // ì…ë ¥ëœ í‚¤ê°€ ìˆëŠ”ì§€ í™•ì¸
 		return k_none;
 	}
 
-	int byte = _getch();    // ÀÔ·ÂµÈ Å°¸¦ Àü´Ş ¹Ş±â
+	int byte = _getch();    // ì…ë ¥ëœ í‚¤ë¥¼ ì „ë‹¬ ë°›ê¸°
 	switch (byte) {
-	case 'q': return k_quit;  // 'q'¸¦ ´©¸£¸é Á¾·á
+	case 'q': return k_quit;  // 'q'ë¥¼ ëˆ„ë¥´ë©´ ì¢…ë£Œ
 	case 224:
-		byte = _getch();  // MSB 224°¡ ÀÔ·Â µÇ¸é 1¹ÙÀÌÆ® ´õ Àü´Ş ¹Ş±â
+		byte = _getch();  // MSB 224ê°€ ì…ë ¥ ë˜ë©´ 1ë°”ì´íŠ¸ ë” ì „ë‹¬ ë°›ê¸°
 		switch (byte) {
 		case 72: return k_up;
 		case 75: return k_left;
