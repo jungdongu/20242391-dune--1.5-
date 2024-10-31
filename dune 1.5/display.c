@@ -1,14 +1,14 @@
 /*
 *  display.c:
-* È­¸é¿¡ °ÔÀÓ Á¤º¸¸¦ Ãâ·Â
-* ¸Ê, Ä¿¼­, ½Ã½ºÅÛ ¸Þ½ÃÁö, Á¤º¸Ã¢, ÀÚ¿ø »óÅÂ µîµî
-* io.c¿¡ ÀÖ´Â ÇÔ¼öµéÀ» »ç¿ëÇÔ
+* í™”ë©´ì— ê²Œìž„ ì •ë³´ë¥¼ ì¶œë ¥
+* ë§µ, ì»¤ì„œ, ì‹œìŠ¤í…œ ë©”ì‹œì§€, ì •ë³´ì°½, ìžì› ìƒíƒœ ë“±ë“±
+* io.cì— ìžˆëŠ” í•¨ìˆ˜ë“¤ì„ ì‚¬ìš©í•¨
 */
 
 #include "display.h"
 #include "io.h"
 
-// Ãâ·ÂÇÒ ³»¿ëµéÀÇ ÁÂ»ó´Ü(topleft) ÁÂÇ¥
+// ì¶œë ¥í•  ë‚´ìš©ë“¤ì˜ ì¢Œìƒë‹¨(topleft) ì¢Œí‘œ
 const POSITION resource_pos = { 0, 0 };
 const POSITION map_pos = { 1, 0 };
 
@@ -72,7 +72,7 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	}
 }
 
-// frontbuf[][]¿¡¼­ Ä¿¼­ À§Ä¡ÀÇ ¹®ÀÚ¸¦ »ö¸¸ ¹Ù²ã¼­ ±×´ë·Î ´Ù½Ã Ãâ·Â
+// frontbuf[][]ì—ì„œ ì»¤ì„œ ìœ„ì¹˜ì˜ ë¬¸ìžë¥¼ ìƒ‰ë§Œ ë°”ê¿”ì„œ ê·¸ëŒ€ë¡œ ë‹¤ì‹œ ì¶œë ¥
 void display_cursor(CURSOR cursor) {
 	POSITION prev = cursor.previous;
 	POSITION curr = cursor.current;
