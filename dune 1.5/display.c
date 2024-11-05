@@ -15,12 +15,20 @@ const POSITION map_pos = { 1, 0 };
 
 char backbuf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 char frontbuf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+char d_buf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+char r_buf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+char c_buf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+char b_buf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 
 void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
+void project2(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
 void display_resource(RESOURCE resource);
 void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void display_cursor(CURSOR cursor);
-
+void display_system_message(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+void display_object_info(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+void display_commands(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+void d_build(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 
 void display(
 	RESOURCE resource,
@@ -30,10 +38,11 @@ void display(
 	display_resource(resource);
 	display_map(map);
 	display_cursor(cursor);
-	// display_system_message()
-	// display_object_info()
-	// display_commands()
-	// ...
+	display_system_message(map);
+	display_object_info(map);
+	display_commands(map);
+	d_build(map);
+	//
 }
 
 void display_resource(RESOURCE resource) {
@@ -57,7 +66,17 @@ void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP
 		}
 	}
 }
-
+void project2(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]) {
+	for (int i = 0; i < MAP_HEIGHT; i++) {
+		for (int j = 0; j < MAP_WIDTH; j++) {
+			for (int k = 0; k < N_LAYER; k++) {
+				if (k == 0) {
+					dest[i][j] = src[k][i][j];
+				}
+			}
+		}
+	}
+}
 void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	project(map, backbuf);
 
@@ -72,6 +91,97 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	}
 }
 
+void display_system_message(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
+	project2(map, backbuf);
+	for (int i = 0; i < MAP_HEIGHT-10; i++) {
+		for (int j = 0; j < MAP_WIDTH; j++) {
+			if (d_buf[i][j] != backbuf[i][j]) {
+				if (i == 0) {
+					POSITION pos = { i + 18,j };
+					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT);
+				}
+				else {
+					POSITION pos = { i + 18,j };
+					printc(padd(map_pos, pos), backbuf[i+10][j], COLOR_DEFAULT);
+				}
+			}
+			d_buf[i][j] = backbuf[i][j];
+		}
+	}
+}
+void display_object_info(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
+	project2(map, backbuf);
+	for (int i = 0; i < MAP_HEIGHT; i++) {
+		for (int j = 0; j < MAP_WIDTH-5; j++) {
+			if (r_buf[i][j] != backbuf[i][j]) {
+				if (j == 54) {
+					POSITION pos = { i ,j + 60 };
+					printc(padd(map_pos, pos), backbuf[i][j+5], COLOR_DEFAULT);
+				}
+				else {
+					POSITION pos = { i ,j + 60 };
+					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT);
+				}
+			}
+			r_buf[i][j] = backbuf[i][j];
+		}
+	}
+}
+
+void display_commands(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
+	project2(map, backbuf);
+	for (int i = 0; i < MAP_HEIGHT-10; i++) {
+		for (int j = 0; j < MAP_WIDTH-5; j++) {
+			if (c_buf[i][j] != backbuf[i][j]) {
+				if (i == 0) {
+					POSITION pos = { i+18 ,j + 60 };
+					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT);
+				}
+				else if (j == 54) {
+					POSITION pos = { i + 18 ,j + 60 };
+					printc(padd(map_pos, pos), backbuf[i][j + 5], COLOR_DEFAULT);
+				}
+				else {
+					POSITION pos = { i+18 ,j + 60 };
+					printc(padd(map_pos, pos), backbuf[i + 10][j], COLOR_DEFAULT);
+				}
+			}
+			c_buf[i][j] = backbuf[i][j];
+		}
+	}
+}
+
+void d_build(char buil[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
+	for (int i = 0; i < MAP_HEIGHT; i++) {
+		for (int j = 0; j < MAP_WIDTH; j++) {
+			for (int k = 0; k < N_LAYER; k++) {
+				if (k == 0) {
+					if (i == 12 && buil[k][i][j] != b_buf[i][j]) {
+						POSITION pos = { 1,57 };
+						printc(padd(map_pos, pos), ' ', 15,i);
+						pos.column++;
+						printc(padd(map_pos, pos), ' ', 15,i);
+						POSITION pos2 = { 2,57 };
+						printc(padd(map_pos, pos2), 'B', 15,i);
+						pos2.column++;
+						printc(padd(map_pos, pos2), ' ', 15,i);
+						pos2.row++;
+						printc(padd(map_pos, pos2), 'H', 15,i);
+					}
+					else if (i == 9 && buil[k][i][j] != b_buf[i][j]) {
+
+					}
+					b_buf[i][j] = buil[k][i][j];
+				}
+			}
+		}
+	} 
+}
+
+
+
+
+
 // frontbuf[][]에서 커서 위치의 문자를 색만 바꿔서 그대로 다시 출력
 void display_cursor(CURSOR cursor) {
 	POSITION prev = cursor.previous;
@@ -82,4 +192,5 @@ void display_cursor(CURSOR cursor) {
 
 	ch = frontbuf[curr.row][curr.column];
 	printc(padd(map_pos, curr), ch, COLOR_CURSOR);
+
 }
