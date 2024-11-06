@@ -8,13 +8,13 @@ void gotoxy(POSITION pos) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-void set_color(int color) {
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+void set_color(int color,int bag) {
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color | (bag <<4));
 }
 
-void printc(POSITION pos, char ch, int color) {
+void printc(POSITION pos, char ch, int color, int bag) {
 	if (color >= 0) {
-		set_color(color);
+		set_color(color,bag);
 	}
 	gotoxy(pos);
 	printf("%c", ch);
