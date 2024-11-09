@@ -1,9 +1,11 @@
-﻿#include <stdlib.h>
+#include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <math.h>
 #include "common.h"
 #include "io.h"
 #include "display.h"
+
 
 void init(void);
 void intro(void);
@@ -11,7 +13,8 @@ void outro(void);
 void cursor_move(DIRECTION dir);
 void sample_obj_move(void);
 POSITION sample_obj_next_position(void);
-
+POSITION sand_next_position(void);
+POSITION sand_new_dest(void);
 
 /* ================= control =================== */
 int sys_clock = 0;		// system-wide clock(ms)
@@ -35,11 +38,27 @@ OBJECT_SAMPLE obj = {
 	.speed = 300,
 	.next_move_time = 300
 };
+OBJECT_SAMPLE sand = {
+	.pos = {4,12},
+	.dest = {MAP_HEIGHT - 2,MAP_WIDTH - 2},
+	.repr = 'W',
+	.speed = 300,
+	.next_move_time = 1000,
+};
+char s_buf[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
+char obj_buf[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
+char copy_buf [MAP_HEIGHT][MAP_WIDTH] = { 0 };
+const POSITION map_pos2 = { 1, 0 };
+int p_h_len = 0;
+int a_h_len = 0;
+POSITION P_h_location = { 0,0 };
+POSITION A_h_location = { 0,0 };
+
 
 /* ================= main() =================== */
 int main(void) {
 	srand((unsigned int)time(NULL));
-
+	
 	init();
 	intro();
 	display(resource, map, cursor);
@@ -56,6 +75,12 @@ int main(void) {
 			// 방향키 외의 입력
 			switch (key) {
 			case k_quit: outro();
+			case k_tp: 
+				sel_tp();
+				break;
+			case k_re:
+				info_re();
+				break;
 			case k_none:
 			case k_undef:
 			default: break;
@@ -99,6 +124,8 @@ void init(void) {
 		}
 	}
 
+
+
 	// layer 1(map[1])은 비워 두기(-1로 채움)
 	for (int i = 0; i < MAP_HEIGHT; i++) {
 		for (int j = 0; j < MAP_WIDTH; j++) {
@@ -106,8 +133,37 @@ void init(void) {
 		}
 	}
 
+	for (int i = 0; i < MAP_HEIGHT; i++) {
+		for (int j = 0; j < MAP_WIDTH; j++) {
+			if ((1 <= i && i <= 2) && (57 <= j && j <= 58)) {
+				obj_buf[1][i][j] = 'B';
+			}
+			else if ((i >= 15 && i <= 16) && (j >= 1 && j <= 2)) {
+				obj_buf[1][i][j] = 'B';
+			}
+			else if ((i == 3 && j == 58) || (i == 14 && j == 1)) {
+				obj_buf[1][i][j] = 'H';
+			}
+			else if (((i >= 1 && i <= 2) && (j >= 55 && j <= 56)) || ((i >= 15 && i <= 16) && (j >= 3 && j <= 4))) {
+				obj_buf[1][i][j] = 'P';
+			}
+			else if ((i == 5 && j == 58) || (i == 12 && j == 1)) {
+				obj_buf[1][i][j] = '5';
+			}
+			else if ((i == 4 && j == 12) || (i == 14 && j == 39)) {
+				obj_buf[1][i][j] = 'W';
+			}
+			else if ((i == 5 && j == 48) || (i == 14 && j == 22) || (i == 15 && j == 54)) {
+				obj_buf[1][i][j] = 'R';
+			}
+			else if (((i >= 4 && i <= 5) && (j >= 33 && j <= 34)) || ((i >= 14 && i <= 15) && (j >= 35 && j <= 36))) {
+				obj_buf[1][i][j] = 'R';
+			}
+		}
+	}
 	// object sample
 	map[1][obj.pos.row][obj.pos.column] = 'o';
+	map[1][sand.pos.row][sand.pos.column] = 'W';
 }
 
 // (가능하다면) 지정한 방향으로 커서 이동
@@ -159,12 +215,110 @@ POSITION sample_obj_next_position(void) {
 	POSITION next_pos = pmove(obj.pos, dir);
 	if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
 		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
-		map[1][next_pos.row][next_pos.column] < 0) {
+		map[1][next_pos.row][next_pos.column] < 0 && obj_buf != 'R') {
 		
 		return next_pos;
 	}
 	else {
 		return obj.pos;  // 제자리
+	}
+}
+
+POSITION sand_next_position(void) {
+	// 현재 위치와 목적지를 비교해서 이동 방향 결정	
+	POSITION diff = psub(sand.dest, sand.pos);
+	DIRECTION dir;
+
+	// 목적지 도착. 지금은 단순히 원래 자리로 왕복
+	if (diff.row == 0 && diff.column == 0) {
+		if (sand.dest.row == 4 && sand.dest.column == 12) {
+			// topleft --> bottomright로 목적지 설정
+			POSITION new_dest = { MAP_HEIGHT - 2, MAP_WIDTH - 2 };
+			sand.dest = new_dest;
+		}
+		else {
+			// bottomright --> topleft로 목적지 설정
+			POSITION new_dest = { 4, 12 };
+			sand.dest = new_dest;
+		}
+		return sand.pos;
+	}
+
+	// 가로축, 세로축 거리를 비교해서 더 먼 쪽 축으로 이동
+	if (abs(diff.row) >= abs(diff.column)) {
+		dir = (diff.row >= 0) ? d_down : d_up;
+	}
+	else {
+		dir = (diff.column >= 0) ? d_right : d_left;
+	}
+
+		// validation check
+		// next_pos가 맵을 벗어나지 않고, (지금은 없지만)장애물에 부딪히지 않으면 다음 위치로 이동
+		// 지금은 충돌 시 아무것도 안 하는데, 나중에는 장애물을 피해가거나 적과 전투를 하거나... 등등
+		POSITION next_pos = pmove(sand.pos, dir);
+		if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
+			1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
+			map[1][next_pos.row][next_pos.column] < 0 ) {
+
+			return next_pos;
+		}
+		else {
+			return sand.pos;  // 제자리
+		}
+		
+}
+POSITION sand_new_dest(void) {
+	for (int i = 0; i < MAP_HEIGHT; i++) {
+		for (int j = 0; j < MAP_WIDTH; j++) {
+			if (obj_buf[1][i][j] == 'H') {
+				if (i == 3) {
+					A_h_location.row = i;
+					A_h_location.column = j;
+				}
+				else if (i == 14) {
+					P_h_location.row = i;
+					P_h_location.column = j;
+				}
+
+			}
+			copy_buf[i][j] = obj_buf[0][i][j];
+		}
+	}
+
+
+	POSITION P_H = psub(P_h_location, sand.pos);
+	p_h_len = root(P_H.row, P_H.column);
+	POSITION A_H = psub(A_h_location, sand.pos);
+	a_h_len = root(A_H.row, A_H.column);
+
+
+	if (p_h_len <= a_h_len) {
+		if (p_h_len == 0) {
+			obj_buf[1][P_h_location.row][P_h_location.column] = ' ';
+			P_h_location.row = 1000;
+			P_h_location.column = 1000;
+			sand.dest.row = A_h_location.row;
+			sand.dest.column = A_h_location.column;
+			return sand.dest;
+		}
+		sand.dest.row = P_h_location.row;
+		sand.dest.column = P_h_location.column;
+		return sand.dest;
+	}
+
+
+	else {
+		if (a_h_len == 0) {
+			obj_buf[1][A_h_location.row][A_h_location.column] = ' ';
+			A_h_location.row = 1000;
+			A_h_location.column = 1000;
+			sand.dest.row = P_h_location.row;
+			sand.dest.column = P_h_location.column;
+			return sand.dest;
+		}
+		sand.dest.row = A_h_location.row;
+		sand.dest.column = A_h_location.column;
+		return sand.dest;
 	}
 }
 
@@ -176,8 +330,14 @@ void sample_obj_move(void) {
 
 	// 오브젝트(건물, 유닛 등)은 layer1(map[1])에 저장
 	map[1][obj.pos.row][obj.pos.column] = -1;
+	map[1][sand.pos.row][sand.pos.column] = -1;
+	sand.dest = sand_new_dest();
 	obj.pos = sample_obj_next_position();
+	sand.pos = sand_next_position();
+
 	map[1][obj.pos.row][obj.pos.column] = obj.repr;
+	map[1][sand.pos.row][sand.pos.column] = sand.repr;
 
 	obj.next_move_time = sys_clock + obj.speed;
+	sand.next_move_time = sys_clock + sand.speed;
 }
