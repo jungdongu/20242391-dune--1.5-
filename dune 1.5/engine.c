@@ -168,7 +168,7 @@ void init(void) {
 				map[1][i][j] = 'P';
 			}
 			else if ((i == 5 && j == 58) || (i == 12 && j == 1)) {
-				map[1][i][j] = '5';
+				map[1][i][j] = 5;
 			}
 			else if ((i == 5 && j == 48) || (i == 14 && j == 22) || (i == 15 && j == 54)) {
 				map[1][i][j] = 'R';
@@ -272,7 +272,8 @@ POSITION sand_next_position(void) {
 		POSITION next_pos = pmove(sand.pos, dir);
 		if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
 			1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
-			map[1][next_pos.row][next_pos.column] < 0 || map[1][next_pos.row][next_pos.column] == 'H') {
+			map[1][next_pos.row][next_pos.column] < 0 || map[1][next_pos.row][next_pos.column] == 'H' \
+			|| map[1][next_pos.row][next_pos.column] == 'R') {
 
 			return next_pos;
 		}
@@ -307,7 +308,8 @@ POSITION sand2_next_position(void) {
 	POSITION next_pos = pmove(sand2.pos, dir);
 	if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
 		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
-		map[1][next_pos.row][next_pos.column] < 0 || map[1][next_pos.row][next_pos.column] == 'H') {
+		map[1][next_pos.row][next_pos.column] < 0 || map[1][next_pos.row][next_pos.column] == 'H' \
+		|| map[1][next_pos.row][next_pos.column] == 'R') {
 
 		return next_pos;
 	}
@@ -368,6 +370,9 @@ POSITION sand_new_dest(void) {
 		sand.dest.row = A_h_location.row;
 		sand.dest.column = A_h_location.column;
 		return sand.dest;
+		if (map[1][sand.pos.row][sand.pos.column] == 'R') {
+			map[1][sand.pos.row][sand.pos.column] == ' ';
+		}
 	}
 }
 POSITION sand2_new_dest(void) {
@@ -423,6 +428,9 @@ POSITION sand2_new_dest(void) {
 		sand2.dest.column = A_h_location.column;
 		return sand2.dest;
 	}
+	if (map[1][sand2.pos.row][sand2.pos.column] == 'R') {
+		map[1][sand2.pos.row][sand2.pos.column] == ' ';
+	}
 }
 
 void sample_obj_move(void) {
@@ -439,11 +447,13 @@ void sample_obj_move(void) {
 
 void sand_obj_move(void) {
 
-	/*if (t.next_move_time >= sys_clock) {
-		map[1][sand.pos.row][sand.pos.column + 1] = '5';
-		map[1][sand2.pos.row][sand2.pos.column + 1] = '5';
+	if (t.next_move_time <= sys_clock) {
+		int random = rand() % 9 + 1;
+		map[1][sand.pos.row][sand.pos.column + 1] = random;
+		map[1][sand2.pos.row][sand2.pos.column + 1] = random;
 		t.next_move_time += 10000;
-	}*/
+
+	}
 	if (sys_clock <= sand.next_move_time) {
 		// 아직 시간이 안 됐음
 		return;
