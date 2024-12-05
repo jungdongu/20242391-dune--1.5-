@@ -1,3 +1,8 @@
+//20242391 정동우
+//1) ~ 5) 까지 했습니다.
+//보너스는 하지 않았습니다.
+
+
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
@@ -26,10 +31,11 @@ CURSOR cursor = { { 1, 1 }, {1, 1} };
 
 /* ================= game data =================== */
 char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
+extern int cur = 0;
 
 RESOURCE resource = { 
-	.spice = 0,
-	.spice_max = 0,
+	.spice = 5,
+	.spice_max = 5,
 	.population = 0,
 	.population_max = 0
 };
@@ -95,10 +101,34 @@ int main(void) {
 			switch (key) {
 			case k_quit: outro();
 			case k_tp: 
-				sel_tp(map);
+				if (cur == 0) { 
+					sel_tp(map, resource);
+				}
+				else if (cur == 1) {
+					tower_cre(map);
+				}
 				break;
 			case k_re:
 				info_re();
+				command_re();
+				break;
+			case k_build:
+				build_list();
+				break;
+			case k_Plate:
+				build_P();
+				break;
+			case k_Garge:
+				build_G(map);
+				break;
+			case k_Barracks:
+				build_B(map);
+				break;
+			case k_Dormitory:
+				build_D(map);
+				break;
+			case k_Shelter:
+				build_S(map);
 				break;
 			case k_none:
 			case k_undef:
@@ -142,7 +172,7 @@ void outro(void) {
 	printf("##   ##  ##         ##   ##          ##  ##         \n");
 	printf(" #####  ##           ##  ##          ##  #########  \n");
 
-	printf("\n"); // 줄 간격 추가
+	printf("\n");
 
 	printf(" #######  ##     ##  ########  ######## \n");
 	printf("##     ## ##     ##  ##        ##     ## \n");
@@ -475,8 +505,9 @@ void sand_obj_move(void) {
 
 	if (t.next_move_time <= sys_clock) {
 		int random = rand() % 9 + 1;
+		int random2 = rand() % 9 + 1;
 		map[1][sand.pos.row][sand.pos.column + 1] = random;
-		map[1][sand2.pos.row][sand2.pos.column + 1] = random;
+		map[1][sand2.pos.row][sand2.pos.column + 1] = random2;
 		t.next_move_time += 10000;
 
 	}
