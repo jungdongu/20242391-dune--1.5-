@@ -2,6 +2,7 @@
 * raw(?) I/O
 */
 #include "io.h"
+#include "common.h"
 
 void gotoxy(POSITION pos) {
 	COORD coord = { pos.column, pos.row }; // 행, 열 반대로 전달
@@ -20,6 +21,28 @@ void printc(POSITION pos, char ch, int color, int bag) {
 	printf("%c", ch);
 }
 
+void printc2(POSITION pos, char ch[100], int color, int bag) {
+	if (color >= 0) {
+		set_color(color, bag);
+	}
+	gotoxy(pos);
+	printf("%s", ch);
+}
+
+void printc3(POSITION pos, char ch, int color, int bag) {
+	if (color >= 0) {
+		set_color(color, bag);
+	}
+	gotoxy(pos);
+
+	printf("%d", ch);
+}
+
+
+
+
+
+
 KEY get_key(void) {
 	if (!_kbhit()) {  // 입력된 키가 있는지 확인
 		return k_none;
@@ -27,7 +50,24 @@ KEY get_key(void) {
 
 	int byte = _getch();    // 입력된 키를 전달 받기
 	switch (byte) {
-	case 'q': return k_quit;  // 'q'를 누르면 종료
+	case 'q': return k_quit; // 'q'를 누르면 종료
+	case 'Q': return k_quit;
+	case ' ': return k_tp;
+	case 'b': return k_build;
+	case 'B': return k_build;
+	case 'h': return k_habester;
+	case 'H': return k_habester;
+	case 'P': return k_Plate;
+	case 'p': return k_Plate;
+	case 'D': return k_Dormitory;
+	case 'd': return k_Dormitory;
+	case 'G': return k_Garge;
+	case 'g': return k_Garge;
+	case 'a': return k_Barracks;
+	case 'A': return k_Barracks;
+	case 'S': return k_Shelter;
+	case 's': return k_Shelter;
+	case 27: return k_re;
 	case 224:
 		byte = _getch();  // MSB 224가 입력 되면 1바이트 더 전달 받기
 		switch (byte) {
