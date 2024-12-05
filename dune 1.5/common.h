@@ -36,6 +36,13 @@ typedef enum {
 	k_quit,
 	k_tp,
 	k_re,
+	k_build,
+	k_habester,
+	k_Plate,
+	k_Dormitory,
+	k_Garge,
+	k_Barracks,
+	k_Shelter,
 	k_undef, // 정의되지 않은 키 입력	
 } KEY;
 
@@ -53,6 +60,14 @@ inline POSITION padd(POSITION p1, POSITION p2) {
 	POSITION p = { p1.row + p2.row, p1.column + p2.column };
 	return p;
 }
+inline root(int x, int y) {
+	int r;
+	x = x * x;
+	y = y * y;
+	r = x + y;
+	return sqrt(r);
+}
+
 
 // p1 - p2
 inline POSITION psub(POSITION p1, POSITION p2) {
