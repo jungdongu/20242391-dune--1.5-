@@ -22,6 +22,7 @@ POSITION sand_next_position(void);
 POSITION sand2_next_position(void);
 POSITION sand_new_dest(void);
 POSITION sand2_new_dest(void);
+POSITION harvest_next_position(void);
 void sand_obj_move(void);
 
 /* ================= control =================== */
@@ -32,7 +33,11 @@ CURSOR cursor = { { 1, 1 }, {1, 1} };
 /* ================= game data =================== */
 char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
 extern int cur = 0;
-
+extern int harvest_dest_row;
+extern int harvest_dest_column;
+extern int harvest_pos_row;
+extern int harvest_pos_column;
+extern int h_m;
 RESOURCE resource = { 
 	.spice = 5,
 	.spice_max = 5,
@@ -70,6 +75,38 @@ OBJECT_SAMPLE t = {
 	.speed = 300,
 	.next_move_time = 10000,
 };
+
+OBJECT_SAMPLE Freeman = {
+	.pos = {0,0},
+	.dest = {0,0},
+	.repr = 'F',
+	.speed = 300,
+	.next_move_time = 400,
+	.hp = 25,
+	.attack = 15,
+	.attack_time = 200,
+	.population = 2,
+};
+
+OBJECT_SAMPLE marin = {
+	.pos = {0,0},
+	.dest = {0,0},
+	.repr = 'M',
+	.speed = 300,
+	.next_move_time = 1000,
+	.hp = 15,
+	.attack = 5,
+	.attack_time = 800,
+	.population = 1,
+};
+OBJECT_SAMPLE Harvest = {
+	.pos = {0,0},
+	.dest = {0,0},
+	.repr = 'H',
+	.next_move_time = 2000,
+	.hp = 70,
+	.population = 5,
+};
 char s_buf[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
 char copy_buf [MAP_HEIGHT][MAP_WIDTH] = { 0 };
 char sandworm[MAP_HEIGHT][MAP_WIDTH] = { 0 };
@@ -103,9 +140,13 @@ int main(void) {
 			case k_tp: 
 				if (cur == 0) { 
 					sel_tp(map, resource);
+					h_select(map,resource,cursor);
 				}
 				else if (cur == 1) {
 					tower_cre(map);
+				}
+				else if (cur == 2) {
+					h_move(map, resource, cursor);
 				}
 				break;
 			case k_re:
@@ -130,6 +171,8 @@ int main(void) {
 			case k_Shelter:
 				build_S(map);
 				break;
+			case k_habester:
+
 			case k_none:
 			case k_undef:
 			default: break;
@@ -139,7 +182,8 @@ int main(void) {
 		// 샘플 오브젝트 동작
 		sample_obj_move();
 		sand_obj_move();
-
+		if (h_m == 1) {
+		}
 		// 화면 출력
 		display(resource, map, cursor);
 		Sleep(TICK);
@@ -181,7 +225,6 @@ void outro(void) {
 	printf("##     ## ##     ##  ##        ##     ##  \n");
 	printf("##     ##  ##   ##   ##        ##      ## \n");
 	printf(" #######    #####    ########  ##       ##\n");
-	printf("exiting...\n");
 	exit(0);
 }
 
@@ -486,6 +529,51 @@ POSITION sand2_new_dest(void) {
 	}
 	if (map[1][sand2.pos.row][sand2.pos.column] == 'R') {
 		map[1][sand2.pos.row][sand2.pos.column] == ' ';
+	}
+}
+POSITION harvest_next_position(void) {
+	POSITION Harvest_dest;
+	POSITION Harvest_pos;
+	Harvest_dest.row = harvest_dest_row;
+	Harvest_dest.column = harvest_dest_column;
+	Harvest_pos.row = harvest_pos_row;
+	Harvest_pos.column = harvest_pos_column;	
+	POSITION diff = psub(Harvest_dest, Harvest_pos);
+	DIRECTION dir;
+
+	// 목적지 도착. 지금은 단순히 원래 자리로 왕복
+	if (diff.row == 0 && diff.column == 0) {
+		if (Harvest_dest.row == harvest_pos_row && Harvest_dest.column == harvest_pos_column) {
+			POSITION new_dest = { harvest_dest_row,harvest_dest_column};
+			Harvest_dest = new_dest;
+		}
+		else {
+			POSITION new_dest = { harvest_pos_row, harvest_pos_column };
+			Harvest_dest = new_dest;
+		}
+		return Harvest_pos;
+	}
+
+	// 가로축, 세로축 거리를 비교해서 더 먼 쪽 축으로 이동
+	if (abs(diff.row) >= abs(diff.column)) {
+		dir = (diff.row >= 0) ? d_down : d_up;
+	}
+	else {
+		dir = (diff.column >= 0) ? d_right : d_left;
+	}
+
+	// validation check
+	// next_pos가 맵을 벗어나지 않고, (지금은 없지만)장애물에 부딪히지 않으면 다음 위치로 이동
+	// 지금은 충돌 시 아무것도 안 하는데, 나중에는 장애물을 피해가거나 적과 전투를 하거나... 등등
+	POSITION next_pos = pmove(sand2.pos, dir);
+	if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
+		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
+		map[1][next_pos.row][next_pos.column] < 0 ) {
+
+		return next_pos;
+	}
+	else {
+		return Harvest_pos;  // 제자리
 	}
 }
 
