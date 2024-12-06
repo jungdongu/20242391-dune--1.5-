@@ -35,8 +35,14 @@ int hei_h = 14;
 int wid_h = 2;
 int build = 0; // 1:장판 2:숙소 3:창고 4:병영 5:은신처
 extern int cur;
+int harvest_dest_row = 1;
+int harvest_dest_column = 1;
+int harvest_pos_row = 1;
+int harvest_pos_column = 1; h_m = 0;
+int unit_row = 0, unit_column = 0;
 int cur_row = 0, cur_column = 0, set = 0;
 int spice_buf = 0, spice = 0, spice_max = 0, spice_population = 0, spice_population_max = 0;
+
 void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
 void project2(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
 void display_resource(RESOURCE resource);
@@ -47,6 +53,9 @@ void display_object_info(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void display_commands(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void h_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource);
+void h_move(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource,CURSOR cursor);
+void h_select(char mpa[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor);
+POSITION k;
 
 
 
@@ -70,6 +79,9 @@ void display_resource(RESOURCE resource) {
 		spice_population = resource.population;
 		spice_population_max = resource.population_max;
 		spice_buf = 1;
+	}
+	if (spice > spice_max) {
+		spice = spice_max;
 	}
 	set_color(COLOR_RESOURCE,0);
 
@@ -287,6 +299,7 @@ void display_cursor(CURSOR cursor) {
 		printc(padd(map_pos, curr), ch, 15, 255 - b_col[curr.row][curr.column]);
 	}
 	cur_loc[1][1] = backbuf[curr.row][curr.column];
+	unit_row = curr.row, unit_column = curr.column;
 	
 }
 
@@ -360,7 +373,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			hei_i++;
 			h_cre(map, resource);
 		}
-		else {
+		else if(cur_loc[1][1] == ' '){
 			command_re();
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
@@ -379,13 +392,37 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 		info_re();
 	}
 }
+void h_select(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH],RESOURCE resource, CURSOR cursor) {
+	if (cur_loc[1][1] == 'H') {
+		command_re();
+		set = 1;
+		harvest_pos_row = unit_row;
+		harvest_pos_column = unit_column;
+		POSITION pos = { hei_i,wid_i };
+		POSITION pos2 = { hei_c , wid_c };
+		printc2(padd(map_pos, pos), "이름:하베스터,체력:15", 15, 0);
+		pos.row++;
+		printc2(padd(map_pos, pos), "■■■■■", 15, 0);
+		pos.row++;
+		printc2(padd(map_pos, pos), "■□■□■", 15, 0);
+		pos.row++;;
+		printc2(padd(map_pos, pos), "■■■■■", 15, 0);
+		pos.row++;
+		printc2(padd(map_pos, pos), "■□□□■", 15, 0);
+		pos.row++;
+		printc2(padd(map_pos, pos), "■■■■■", 15, 0);
+		printc2(padd(map_pos, pos2), "H:Harvest(수확),M:move(이동)", 15, 0);
+		hei_i += 6;
+		h_move(map,resource, cursor);
+		}
+}
 void build_list(void) {
 	command_re();
 	set = 1;
 	POSITION pos = { hei_c-1,wid_c - 15 };
 	printc2(padd(map_pos, pos), "장판(P:Plate) 숙소(D:Dormitory) 창고(G:Garage)",15,0);
 	POSITION pos2 = { hei_c + 1,wid_c - 15 };
-	printc2(padd(map_pos, pos2), "병영(A:Barracks) 은신처(S:Shelter)", 15, 0);
+	printc2(padd(map_pos, pos2), "병영(A:Barracks) 은신처(R:Shelter)", 15, 0);
 
 }
 void h_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
@@ -504,6 +541,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 				cur_row--;
 				map[1][cur_row][cur_column] = 'D';
 				spice -= 2;
+				spice_population_max += 10;
 				cur = 0;
 			}
 			else if (spice < 2) {
@@ -526,6 +564,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 				map[1][cur_row][cur_column] = 'G';
 				cur_row--;
 				map[1][cur_row][cur_column] = 'G';
+				spice_max += 10;
 				spice -= 4;
 				cur = 0;
 			}
@@ -584,3 +623,23 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 		}
 	}
 }
+void h_move(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor) {
+	if (cur != 2) {
+		while (1) {
+			KEY key = get_key();
+			if (key == k_habester) {
+				break;
+			}
+		}
+	}
+	cur = 2;
+	if (cur_loc[1][1] == 1 || cur_loc[1][1] == 2 || cur_loc[1][1] == 3 \
+		|| cur_loc[1][1] == 4 || cur_loc[1][1] == 5 || cur_loc[1][1] == 6 \
+		|| cur_loc[1][1] == 7 || cur_loc[1][1] == 8 || cur_loc[1][1] == 9) {
+		harvest_dest_row =unit_row;
+		harvest_dest_column = unit_column;
+		cur = 0;
+		h_m = 1;
+	}
+}
+
