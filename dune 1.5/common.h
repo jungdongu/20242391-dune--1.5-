@@ -19,7 +19,7 @@
 /* ================= 위치와 방향 =================== */
 // 맵에서 위치를 나타내는 구조체
 typedef struct {
-	int row, column;
+	int row,column;
 } POSITION;
 
 // 커서 위치
@@ -107,6 +107,10 @@ typedef struct {
 	int move_period;	// '몇 ms마다 한 칸 움직이는지'를 뜻함
 	int speed;	
 	int next_move_time;	// 다음에 움직일 시간
+	int hp; // 체력
+	int attack; // 공격력
+	int attack_time; //공격주기
+	int population; //인구수
 } OBJECT_SAMPLE;
 
 
