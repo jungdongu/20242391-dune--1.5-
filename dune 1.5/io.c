@@ -29,7 +29,7 @@ void printc2(POSITION pos, char ch[100], int color, int bag) {
 	printf("%s", ch);
 }
 
-void printc3(POSITION pos, char ch, int color, int bag) {
+void printc3(POSITION pos, int ch, int color, int bag) {
 	if (color >= 0) {
 		set_color(color, bag);
 	}
@@ -65,8 +65,12 @@ KEY get_key(void) {
 	case 'g': return k_Garge;
 	case 'a': return k_Barracks;
 	case 'A': return k_Barracks;
-	case 'S': return k_Shelter;
-	case 's': return k_Shelter;
+	case 'R': return k_Shelter;
+	case 'r': return k_Shelter;
+	case 'm': return k_move;
+	case 'M': return k_move;
+	case 'l': return k_move;
+	case 'L': return k_move;
 	case 27: return k_re;
 	case 224:
 		byte = _getch();  // MSB 224가 입력 되면 1바이트 더 전달 받기
