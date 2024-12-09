@@ -43,6 +43,7 @@ typedef enum {
 	k_Garge,
 	k_Barracks,
 	k_Shelter,
+	k_move,
 	k_undef, // 정의되지 않은 키 입력	
 } KEY;
 
@@ -112,6 +113,7 @@ typedef struct {
 	int attack_time; //공격주기
 	int population; //인구수
 } OBJECT_SAMPLE;
+
 
 
 
