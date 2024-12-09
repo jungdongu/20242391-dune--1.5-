@@ -39,4 +39,10 @@ void build_D(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void build_S(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void build_B(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+void h_move(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor);
+void h_select(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor);
+void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+void F_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+void F_move(void);
+void soldier_move(void);
 #endif
