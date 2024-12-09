@@ -38,10 +38,19 @@ extern int cur;
 int harvest_dest_row = 1;
 int harvest_dest_column = 1;
 char harvest_pos_row = 1;
-int harvest_pos_column = 1; h_m = 0, harvest_move;
+int harvest_pos_column = 1; 
+int h_m = 0, s_m = 0, f_m = 0, harvest_move;
 int unit_row = 0, unit_column = 0;
 int cur_row = 0, cur_column = 0, set = 0;
 int spice_buf = 0, spice = 0, spice_max = 0, spice_population = 0, spice_population_max = 0;
+int Soldier_dest_row = 1;
+int Soldier_dest_column = 1;
+int Soldier_pos_row = 1;
+int Soldier_pos_column = 1;
+int Fremen_dest_row = 1;
+int Fremen_dest_column = 1;
+int Fremen_pos_row = 1;
+int Fremen_pos_column = 1;
 
 void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
 void project2(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
@@ -57,6 +66,8 @@ void h_move(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource,CURSOR c
 void h_select(char mpa[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor);
 void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void F_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+void soldier_move(void);
+void F_move(void);
 POSITION k;
 
 
@@ -127,6 +138,16 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 					b_col[i][j] = 6;
 					printc(padd(map_pos, pos), backbuf[i][j], 15, b_col[i][j]);
 					}
+				else if (backbuf[i][j] == 'F') {
+					POSITION pos = { i, j };
+					b_col[i][j] = 9;
+					printc(padd(map_pos, pos), backbuf[i][j], 15, b_col[i][j]);
+				}
+				else if (backbuf[i][j] == 'S') {
+					POSITION pos = { i, j };
+					b_col[i][j] = 9;
+					printc(padd(map_pos, pos), backbuf[i][j], 15, b_col[i][j]);
+				}
 				else if (backbuf[i][j] == 'B') {
 					if (i == 1 || i == 2) {
 						POSITION pos = { i,j };
@@ -185,6 +206,7 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 					POSITION pos = { i, j };
 					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT, 0);
 				}
+
 			}
 			frontbuf[i][j] = backbuf[i][j];
 		}
@@ -263,6 +285,8 @@ void display_cursor(CURSOR cursor) {
 	POSITION curr = cursor.current;
 
 	char ch = frontbuf[prev.row][prev.column];
+	char ch2 = frontbuf[prev.row + 1][prev.column];
+	char ch3 = frontbuf[prev.row + 1][prev.column + 1];
 	if (b_col[prev.row][prev.column] == 6) {
 		printc(padd(map_pos, prev), ch, 15, 0);
 	}
@@ -270,7 +294,7 @@ void display_cursor(CURSOR cursor) {
 		printc(padd(map_pos, prev), ch, 15, 0);
 	}
 	else if (cur == 1) {
-		if (ch != '#') {
+		if (ch != '#' && ch2 != '#' && ch3 != '#') {
 			printc(padd(map_pos, prev), ch, 15, b_col[prev.row][prev.column]);
 			prev.column++;
 			printc(padd(map_pos, prev), ch, 15, b_col[prev.row][prev.column]);
@@ -286,7 +310,8 @@ void display_cursor(CURSOR cursor) {
 	
 	frontbuf[curr.row][curr.column] = backbuf[prev.row][prev.column];
 	ch = frontbuf[curr.row][curr.column];
-
+	ch2 = frontbuf[curr.row + 1][curr.column];
+	ch3 = frontbuf[curr.row + 1][curr.column + 1];
 	if (b_col[prev.row][prev.column] == 6) {
 		printc(padd(map_pos, curr), ch, 15, 0);
 	}
@@ -294,13 +319,16 @@ void display_cursor(CURSOR cursor) {
 		printc(padd(map_pos, curr), ch, 15, 0);
 	}
 	else if (cur == 1){
-		if (ch != '#') {
+		if (ch != '#' && ch2 != '#' && ch3 !='#') {
 			cur_row = curr.row;
 			cur_column = curr.column;
+			cur_loc[1][4] = backbuf[curr.row][curr.column];
 			printc(padd(map_pos, curr), ch, 15, 255 - b_col[curr.row][curr.column]);
 			curr.column++;
+			cur_loc[1][3] = backbuf[curr.row][curr.column];
 			printc(padd(map_pos, curr), ch, 15, 255 - b_col[curr.row][curr.column]);
 			curr.row++;
+			cur_loc[1][2] = backbuf[curr.row][curr.column];
 			printc(padd(map_pos, curr), ch, 15, 255 - b_col[curr.row][curr.column]);
 			curr.column--;
 			printc(padd(map_pos, curr), ch, 15, 255 - b_col[curr.row][curr.column]);
@@ -358,7 +386,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
-			printc2(padd(map_pos, pos), "------돌 지형------", 15, 0);
+			printc2(padd(map_pos, pos), "-----------돌 지형-----------", 15, 0);
 			printc2(padd(map_pos, pos2), "내릴 명령이 없습니다.",15, 0);
 			hei_i++;
 			char r_s[100] = "Unable to perform.";
@@ -370,7 +398,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
-			printc2(padd(map_pos, pos), "-------장판-------", 15, 0);
+			printc2(padd(map_pos, pos), "-----------장판-----------", 15, 0);
 			printc2(padd(map_pos, pos2), "내릴 명령이 없습니다.", 15, 0);
 			hei_i++;
 			
@@ -381,7 +409,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
-			printc2(padd(map_pos, pos), "-------본진-------", 15, 0);
+			printc2(padd(map_pos, pos), "-----------본진-----------", 15, 0);
 			printc2(padd(map_pos, pos2),"H:하베스터 생산.", 15, 0);
 			hei_i++;
 			h_cre(map, resource);
@@ -391,7 +419,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
-			printc2(padd(map_pos, pos), "-----사막 지형-----", 15, 0);
+			printc2(padd(map_pos, pos), "-----------사막 지형-----------", 15, 0);
 			printc2(padd(map_pos, pos2), "내릴 명령이 없습니다.", 15, 0);
 			hei_i++;
 			char d_s[100] = "Unable to perform.             ";
@@ -403,20 +431,44 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
-			printc2(padd(map_pos, pos), "-------병영-------", 15, 0);
+			printc2(padd(map_pos, pos), "-----------병영-----------", 15, 0);
 			printc2(padd(map_pos, pos2), "S:보병생산", 15, 0);
 			hei_i++;
 			b_cre(map);
 		}
-		else if (cur_loc[1][1] == 'S'){
+		else if (cur_loc[1][1] == 'E'){
 			command_re();
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
-			printc2(padd(map_pos, pos), "-------은신처-------", 15, 0);
+			printc2(padd(map_pos, pos), "-----------은신처-----------", 15, 0);
 			printc2(padd(map_pos, pos2), "F:프레맨 생산", 15, 0);
 			hei_i++;
 			F_cre(map);
+		}
+		else if(cur_loc[1][1] == 'S'){
+			command_re();
+			set = 1;
+			Soldier_pos_row = unit_row;
+			Soldier_pos_column = unit_column;
+			POSITION pos = { hei_i,wid_i };
+			POSITION pos2 = { hei_c , wid_c };
+			printc2(padd(map_pos, pos), "이름:보병 체력:15", 15, 0);
+			printc2(padd(map_pos, pos2), "M:이동,L:순찰", 15, 0);
+			hei_i++;
+			soldier_move();
+		}
+		else if (cur_loc[1][1] == 'F') {
+			command_re();
+			set = 1;
+			Fremen_pos_row = unit_row;
+			Fremen_pos_column = unit_column;
+			POSITION pos = { hei_i,wid_i };
+			POSITION pos2 = { hei_c , wid_c };
+			printc2(padd(map_pos, pos), "이름:프레맨 체력:25", 15, 0);
+			printc2(padd(map_pos, pos2), "M:이동,L:순찰", 15, 0);
+			hei_i++;
+			F_move();
 		}
 	}
 	else if (hei_i > 16) {
@@ -430,6 +482,8 @@ void h_select(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH],RESOURCE resource, CURSOR
 		set = 1;
 		harvest_pos_row = unit_row;
 		harvest_pos_column = unit_column;
+		info_re();
+		hei_i = 1;
 		POSITION pos = { hei_i,wid_i };
 		POSITION pos2 = { hei_c , wid_c };
 		printc2(padd(map_pos, pos), "이름:하베스터,체력:15 ", 15, 0);
@@ -625,7 +679,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 			}
 		}
 	}
-	if (cur_loc[1][1] == 'P') {
+	if (cur_loc[1][1] == 'P' && cur_loc[1][2] == 'P' && cur_loc[1][3] == 'P' && cur_loc[1][4] == 'P') {
 		if (build == 2) {
 			if (spice >= 2) {
 				char b_s[100] = "숙소 건설완료!                   ";
@@ -703,13 +757,13 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 				strcpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				POSITION pos = { cur_row,cur_column };
-				map[1][cur_row][cur_column] = 'S';
+				map[1][cur_row][cur_column] = 'E';
 				cur_row++;
-				map[1][cur_row][cur_column] = 'S';
+				map[1][cur_row][cur_column] = 'E';
 				cur_column++;
-				map[1][cur_row][cur_column] = 'S';
+				map[1][cur_row][cur_column] = 'E';
 				cur_row--;
-				map[1][cur_row][cur_column] = 'S';
+				map[1][cur_row][cur_column] = 'E';
 				spice -= 5;
 				cur = 0;
 			}
@@ -740,5 +794,41 @@ void h_move(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR 
 		cur = 0;
 		h_m = 1;
 	}
+}
+void soldier_move(void) {
+	if (cur != 3) {
+		while (1) {
+			KEY key = get_key();
+			if (key == k_move) {
+				break;
+			}
+		}
+	}
+	cur = 3;
+	if (cur_loc[1][1] == ' ') {
+		Soldier_dest_row = unit_row;
+		Soldier_dest_column = unit_column;
+		cur = 0;
+		s_m = 1;
+	}
+
+}
+void F_move(void) {
+	if (cur != 4) {
+		while (1) {
+			KEY key = get_key();
+			if (key == k_move) {
+				break;
+			}
+		}
+	}
+	cur = 4;
+	if (cur_loc[1][1] == ' ') {
+		Fremen_dest_row = unit_row;
+		Fremen_dest_column = unit_column;
+		cur = 0;
+		f_m = 1;
+	}
+	
 }
 
