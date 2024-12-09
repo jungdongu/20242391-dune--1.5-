@@ -17,12 +17,16 @@ void intro(void);
 void outro(void);
 void cursor_move(DIRECTION dir);
 void harvest_obj_move(void);
+void Soldier_obj_move(void);
+void Fremen_obj_move(void);
 POSITION sample_obj_next_position(void);
 POSITION sand_next_position(void);
 POSITION sand2_next_position(void);
 POSITION sand_new_dest(void);
 POSITION sand2_new_dest(void);
 POSITION harvest_next_position(void);
+POSITION Soldier_next_position(void);
+POSITION Fremen_next_position(void);
 void sand_obj_move(void);
 
 /* ================= control =================== */
@@ -33,17 +37,29 @@ CURSOR cursor = { { 1, 1 }, {1, 1} };
 /* ================= game data =================== */
 char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
 int p = 1;
+int ss = 1;
+int ff = 1;
 int close_harvest = 1;
 extern int cur = 0;
 extern int harvest_dest_row;
 extern int harvest_dest_column;
 extern int harvest_pos_row;
 extern int harvest_pos_column;
+extern int Soldier_dest_row;
+extern int Soldier_dest_column;
+extern int Soldier_pos_row;
+extern int Soldier_pos_column;
+extern int Fremen_dest_row;
+extern int Fremen_dest_column;
+extern int Fremen_pos_row;
+extern int Fremen_pos_column;
 extern int h_m;
+extern int s_m;
+extern int f_m;
 extern int spice, spice_max, spice_population, spice_population_max;
 RESOURCE resource = { 
-	.spice = 5,
-	.spice_max = 5,
+	.spice = 50,
+	.spice_max = 50,
 	.population = 0,
 	.population_max = 0
 };
@@ -79,9 +95,7 @@ OBJECT_SAMPLE t = {
 	.next_move_time = 10000,
 };
 
-OBJECT_SAMPLE Freeman = {
-	.pos = {0,0},
-	.dest = {0,0},
+OBJECT_SAMPLE Fremen = {
 	.repr = 'F',
 	.speed = 300,
 	.next_move_time = 400,
@@ -91,10 +105,8 @@ OBJECT_SAMPLE Freeman = {
 	.population = 2,
 };
 
-OBJECT_SAMPLE marin = {
-	.pos = {0,0},
-	.dest = {0,0},
-	.repr = 'M',
+OBJECT_SAMPLE Soldier = {
+	.repr = 'S',
 	.speed = 300,
 	.next_move_time = 1000,
 	.hp = 15,
@@ -117,7 +129,8 @@ int p_h_len = 0;
 int a_h_len = 0;
 POSITION P_h_location = { 0,0 };
 POSITION A_h_location = { 0,0 };
-
+POSITION soldier_location = { 0,0 };
+POSITION Fremen_location = { 0,0 };
 
 /* ================= main() =================== */
 int main(void) {
@@ -149,6 +162,12 @@ int main(void) {
 				}
 				else if (cur == 2) {
 					h_move(map, resource, cursor);
+				}
+				else if (cur == 3) {
+					soldier_move();
+				}
+				else if (cur == 4) {
+					F_move();
 				}
 				break;
 			case k_re:
@@ -188,17 +207,40 @@ int main(void) {
 				Harvest.dest.row = harvest_dest_row;
 				Harvest.dest.column = harvest_dest_column;
 				close_harvest = 1;
-				sys_clock = Harvest.next_move_time;
+				Harvest.next_move_time = sys_clock;
 				p = 0;
+
 			}
 			harvest_obj_move();
 			if ((Harvest.pos.row == sand.pos.row && Harvest.pos.column == sand.pos.column) || \
 				Harvest.pos.row == sand2.pos.row && Harvest.pos.column == sand2.pos.column) {
 				h_m = 0;
 			}
-		
-
 		}
+		if (s_m == 1) {
+			if (ss == 1) {
+				Soldier.pos.row = Soldier_pos_row;
+				Soldier.pos.column = Soldier_pos_column;
+				Soldier.dest.row = Soldier_dest_row;
+				Soldier.dest.column = Soldier_dest_column;
+				Soldier.next_move_time = sys_clock;
+				ss = 0;
+			}
+			Soldier_obj_move();
+		}
+		if (f_m == 1) {
+			if (ff == 1) {
+				Fremen.pos.row = Fremen_pos_row;
+				Fremen.pos.column = Fremen_pos_column;
+				Fremen.dest.row = Fremen_dest_row;
+				Fremen.dest.column = Fremen_dest_column;
+				Fremen.next_move_time = sys_clock;
+				ff = 0;
+
+			}
+			Fremen_obj_move();
+		}
+		
 		// 화면 출력
 		display(resource, map, cursor);
 		Sleep(TICK);
@@ -372,6 +414,81 @@ POSITION harvest_next_position(void) {
 	}
 }
 
+POSITION Fremen_next_position(void) {
+	POSITION diff = psub(Fremen.dest, Fremen.pos);
+	DIRECTION dir;
+
+	if (diff.row == 0 && diff.column == 0) {
+		if (Fremen.dest.row == Fremen_pos_row && Fremen.dest.column == Fremen_pos_column) {
+			POSITION new_dest = { Fremen_dest_row, Fremen_dest_column};
+			Fremen.dest = new_dest;
+		}
+		else {
+			POSITION new_dest = { Fremen_pos_row, Fremen_pos_column };
+			Fremen.dest = new_dest;
+		}
+		return Fremen.pos;
+	}
+
+	if (abs(diff.row) >= abs(diff.column)) {
+		dir = (diff.row >= 0) ? d_down : d_up;
+	}
+	else {
+		dir = (diff.column >= 0) ? d_right : d_left;
+	}
+
+	// validation check
+	// next_pos가 맵을 벗어나지 않고, (지금은 없지만)장애물에 부딪히지 않으면 다음 위치로 이동
+	// 지금은 충돌 시 아무것도 안 하는데, 나중에는 장애물을 피해가거나 적과 전투를 하거나... 등등
+	POSITION next_pos = pmove(Fremen.pos, dir);
+	if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
+		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
+		map[1][next_pos.row][next_pos.column] < 0) {
+
+		return next_pos;
+	}
+	else {
+		return Fremen.pos;  // 제자리
+	}
+}
+POSITION Soldier_next_position(void) {
+	POSITION diff = psub(Soldier.dest, Soldier.pos);
+	DIRECTION dir;
+
+	if (diff.row == 0 && diff.column == 0) {
+		if (Soldier.dest.row == Soldier_pos_row && Soldier.dest.column == Soldier_pos_column) {
+			POSITION new_dest = { Soldier_dest_row, Soldier_dest_column };
+			Soldier.dest = new_dest;
+		}
+		else {
+			POSITION new_dest = { Soldier_pos_row, Soldier_pos_column };
+			Soldier.dest = new_dest;
+		}
+		return Soldier.pos;
+	}
+
+	if (abs(diff.row) >= abs(diff.column)) {
+		dir = (diff.row >= 0) ? d_down : d_up;
+	}
+	else {
+		dir = (diff.column >= 0) ? d_right : d_left;
+	}
+
+	// validation check
+	// next_pos가 맵을 벗어나지 않고, (지금은 없지만)장애물에 부딪히지 않으면 다음 위치로 이동
+	// 지금은 충돌 시 아무것도 안 하는데, 나중에는 장애물을 피해가거나 적과 전투를 하거나... 등등
+	POSITION next_pos = pmove(Soldier.pos, dir);
+	if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
+		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
+		map[1][next_pos.row][next_pos.column] < 0) {
+
+		return next_pos;
+	}
+	else {
+		return Soldier.pos;  // 제자리
+	}
+}
+
 POSITION sand_next_position(void) {
 	// 현재 위치와 목적지를 비교해서 이동 방향 결정	
 	POSITION diff = psub(sand.dest, sand.pos);
@@ -453,8 +570,16 @@ POSITION sand_new_dest(void) {
 				}
 				P_h_location.row = i;
 				P_h_location.column = j;
-
 			}
+			if (map[1][i][j] == 'F'){
+				Fremen_location.row = i;
+				Fremen_location.column = j;
+			}
+			if (map[1][i][j] == 'S') {
+				Fremen_location.row = i;
+				Fremen_location.column = j;
+			}
+			
 			copy_buf[i][j] = map[0][i][j];
 		}
 	}
@@ -605,9 +730,30 @@ void harvest_obj_move(void) {
 	map[1][Harvest.pos.row][Harvest.pos.column] = -1;
 	Harvest.pos = harvest_next_position();
 	map[1][Harvest.pos.row][Harvest.pos.column] = Harvest.repr;
-	Harvest.next_move_time += 500;
+	Harvest.next_move_time += 2000;
 }
-
+void Soldier_obj_move(void) {
+	if (sys_clock <= Soldier.next_move_time) {
+		// 아직 시간이 안 됐음
+		return;
+	}
+	// 오브젝트(건물, 유닛 등)은 layer1(map[1])에 저장
+	map[1][Soldier.pos.row][Soldier.pos.column] = -1;
+	Soldier.pos = Soldier_next_position();
+	map[1][Soldier.pos.row][Soldier.pos.column] = Soldier.repr;
+	Soldier.next_move_time += 1000;
+}
+void Fremen_obj_move(void) {
+	if (sys_clock <= Fremen.next_move_time) {
+		// 아직 시간이 안 됐음
+		return;
+	}
+	// 오브젝트(건물, 유닛 등)은 layer1(map[1])에 저장
+	map[1][Fremen.pos.row][Fremen.pos.column] = -1;
+	Fremen.pos = Fremen_next_position();
+	map[1][Fremen.pos.row][Fremen.pos.column] = Fremen.repr;
+	Fremen.next_move_time += 400;
+}
 void sand_obj_move(void) {
 
 	if (t.next_move_time <= sys_clock) {
