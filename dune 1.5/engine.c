@@ -16,7 +16,6 @@ void init(void);
 void intro(void);
 void outro(void);
 void cursor_move(DIRECTION dir);
-void sample_obj_move(void);
 void harvest_obj_move(void);
 POSITION sample_obj_next_position(void);
 POSITION sand_next_position(void);
@@ -34,12 +33,14 @@ CURSOR cursor = { { 1, 1 }, {1, 1} };
 /* ================= game data =================== */
 char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
 int p = 1;
+int close_harvest = 1;
 extern int cur = 0;
 extern int harvest_dest_row;
 extern int harvest_dest_column;
 extern int harvest_pos_row;
 extern int harvest_pos_column;
 extern int h_m;
+extern int spice, spice_max, spice_population, spice_population_max;
 RESOURCE resource = { 
 	.spice = 5,
 	.spice_max = 5,
@@ -172,8 +173,6 @@ int main(void) {
 			case k_Shelter:
 				build_S(map);
 				break;
-			case k_habester:
-
 			case k_none:
 			case k_undef:
 			default: break;
@@ -181,7 +180,6 @@ int main(void) {
 		}
 
 		// 샘플 오브젝트 동작
-		//sample_obj_move();
 		sand_obj_move();
 		if (h_m == 1) {
 			if (p == 1) {
@@ -189,6 +187,8 @@ int main(void) {
 				Harvest.pos.column = harvest_pos_column;
 				Harvest.dest.row = harvest_dest_row;
 				Harvest.dest.column = harvest_dest_column;
+				close_harvest = 1;
+				sys_clock = Harvest.next_move_time;
 				p = 0;
 			}
 			harvest_obj_move();
@@ -322,16 +322,27 @@ POSITION harvest_next_position(void) {
 	POSITION diff = psub(Harvest.dest, Harvest.pos);
 	DIRECTION dir;
 	// 목적지 도착. 지금은 단순히 원래 자리로 왕복
-	if (diff.row == 0 && diff.column == 0) {
+	if ((diff.row == 1 || diff.row == -1 || diff.row == 0) && \
+		(diff.column == 0 || diff.column == 1 || diff.column == -1)) {
 		if (Harvest.dest.row == harvest_pos_row && Harvest.dest.column == harvest_pos_column) {
-			// topleft --> bottomright로 목적지 설정
 			POSITION new_dest = { harvest_dest_row , harvest_dest_column };
 			Harvest.dest = new_dest;
+			if (close_harvest == 0) {
+				h_m = 0;
+			}
 		}
 		else {
-			// bottomright --> topleft로 목적지 설정
 			POSITION new_dest = { harvest_pos_row , harvest_pos_column };
 			Harvest.dest = new_dest;
+			map[1][harvest_dest_row][harvest_dest_column]--;
+			int spice_random = rand() % 3 + 2;
+			spice += spice_random;
+			if (map[1][harvest_dest_row][harvest_dest_column] == 0) {
+				map[1][harvest_dest_row][harvest_dest_column] = ' ';
+				POSITION new_dest2 = { harvest_pos_row, harvest_pos_column };
+				Harvest.dest = new_dest2;
+				close_harvest = 0;
+			}
 		}
 		return Harvest.pos;
 	}
@@ -350,8 +361,10 @@ POSITION harvest_next_position(void) {
 	POSITION next_pos = pmove(Harvest.pos, dir);
 	if (1 <= next_pos.row && next_pos.row <= MAP_HEIGHT - 2 && \
 		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 && \
-		map[1][next_pos.row][next_pos.column] < 0) {
-		
+		map[1][next_pos.row][next_pos.column] < 0 || (map[1][next_pos.row][next_pos.column] < 10 && map[1][next_pos.row][next_pos.column] >= 1)) {
+		if (map[1][next_pos.row][next_pos.column] < 10 && map[1][next_pos.row][next_pos.column] >= 1) {
+			return next_pos;
+		}
 		return next_pos;
 	}
 	else {
@@ -592,7 +605,7 @@ void harvest_obj_move(void) {
 	map[1][Harvest.pos.row][Harvest.pos.column] = -1;
 	Harvest.pos = harvest_next_position();
 	map[1][Harvest.pos.row][Harvest.pos.column] = Harvest.repr;
-	Harvest.next_move_time += 2000;
+	Harvest.next_move_time += 500;
 }
 
 void sand_obj_move(void) {
