@@ -519,6 +519,12 @@ void h_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 				if (_kbhit()) {
 					int key = _getch();
 					if (key == 'H' || key == 'h') {
+						if (spice_population_max < spice_population + 5) {
+							char h_n[100] = "Not enough population          ";
+							strcpy_s(sys_message1, 100, h_n, 100);
+							sys_mes();
+							break;
+						}
 						if (spice >= 5) {
 							char h_n2[100] = "A new harvester ready            ";
 							strcpy_s(sys_message1, 100, h_n2, 100);
@@ -528,6 +534,7 @@ void h_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 							spice -= 5;
 							map[1][hei_h][wid_h] = 'H';
 							wid_h++;
+							spice_population += 5;
 							break;
 						}
 						else if(spice < 5){
@@ -554,15 +561,24 @@ void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 				int key = _getch();
 				if (key == 'S' || key == 's') {
 					if (spice >= 1) {
-						char h_n2[100] = "A new Soldier ready            ";
-						strcpy_s(sys_message1, 100, h_n2, 100);
-						sys_mes();
-						suc = 'S';
-						b_col[b_row - 2][b_column + 2] = 1;
-						spice -= 1;
-						map[1][b_row - 2][b_column + 2] = 'S';
-						wid_h++;
-						break;
+						if (spice_population_max < spice_population + 1) {
+							char h_n[100] = "Not enough population          ";
+							strcpy_s(sys_message1, 100, h_n, 100);
+							sys_mes();
+							break;
+						}
+						else {
+							char h_n2[100] = "A new Soldier ready            ";
+							strcpy_s(sys_message1, 100, h_n2, 100);
+							sys_mes();
+							suc = 'S';
+							b_col[b_row - 2][b_column + 2] = 1;
+							spice -= 1;
+							map[1][b_row - 2][b_column + 2] = 'S';
+							wid_h++;
+							spice_population += 1;
+							break;
+						}
 					}
 					else if (spice < 1) {
 						char h_n[100] = "Not enough spice          ";
@@ -588,15 +604,24 @@ void F_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 				int key = _getch();
 				if (key == 'F' || key == 'f') {
 					if (spice >= 5) {
-						char h_n2[100] = "A new Fremen ready            ";
-						strcpy_s(sys_message1, 100, h_n2, 100);
-						sys_mes();
-						suc = 'F';
-						b_col[F_row - 2][F_column + 2] = 1;
-						spice -= 5;
-						map[1][F_row - 2][F_column + 2] = 'F';
-						wid_h++;
-						break;
+						if (spice_population_max < spice_population + 2) {
+							char h_n[100] = "Not enough population          ";
+							strcpy_s(sys_message1, 100, h_n, 100);
+							sys_mes();
+							break;
+						}
+						else {
+							char h_n2[100] = "A new Fremen ready            ";
+							strcpy_s(sys_message1, 100, h_n2, 100);
+							sys_mes();
+							suc = 'F';
+							b_col[F_row - 2][F_column + 2] = 1;
+							spice -= 5;
+							map[1][F_row - 2][F_column + 2] = 'F';
+							wid_h++;
+							spice_population += 2;
+							break;
+						}
 					}
 					else if (spice < 5) {
 						char h_n[100] = "Not enough spice          ";
