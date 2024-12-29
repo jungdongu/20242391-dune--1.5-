@@ -38,7 +38,7 @@ extern int cur;
 int harvest_dest_row = 1;
 int harvest_dest_column = 1;
 char harvest_pos_row = 1;
-int harvest_pos_column = 1; 
+int harvest_pos_column = 1;
 int h_m = 0, s_m = 0, f_m = 0, harvest_move;
 int unit_row = 0, unit_column = 0;
 int cur_row = 0, cur_column = 0, set = 0;
@@ -62,7 +62,7 @@ void display_object_info(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void display_commands(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void h_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource);
-void h_move(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource,CURSOR cursor);
+void h_move(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor);
 void h_select(char mpa[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor);
 void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void F_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
@@ -74,7 +74,7 @@ POSITION k;
 
 void display(
 	RESOURCE resource,
-	char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], 
+	char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH],
 	CURSOR cursor)
 {
 	display_resource(resource);
@@ -86,7 +86,7 @@ void display(
 }
 
 void display_resource(RESOURCE resource) {
-	if (spice_buf == 0) { 
+	if (spice_buf == 0) {
 		spice = resource.spice;
 		spice_max = resource.spice_max;
 		spice_population = resource.population;
@@ -96,7 +96,7 @@ void display_resource(RESOURCE resource) {
 	if (spice > spice_max) {
 		spice = spice_max;
 	}
-	set_color(COLOR_RESOURCE,0);
+	set_color(COLOR_RESOURCE, 0);
 
 	gotoxy(resource_pos);
 	printf("spice = %d/%d, population=%d/%d\n",
@@ -137,7 +137,7 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 					POSITION pos = { i, j };
 					b_col[i][j] = 6;
 					printc(padd(map_pos, pos), backbuf[i][j], 15, b_col[i][j]);
-					}
+				}
 				else if (backbuf[i][j] == 'F') {
 					POSITION pos = { i, j };
 					b_col[i][j] = 9;
@@ -196,7 +196,7 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 						printc(padd(map_pos, pos8), backbuf[i][j], 15, b_col[i][j]);
 					}
 				}
-			
+
 				else if (backbuf[i][j] == 'R') {
 					POSITION pos10 = { i,j };
 					b_col[i][j] = 7;
@@ -215,16 +215,16 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 
 void display_system_message(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	project2(map, backbuf);
-	for (int i = 0; i < MAP_HEIGHT-10; i++) {
+	for (int i = 0; i < MAP_HEIGHT - 10; i++) {
 		for (int j = 0; j < MAP_WIDTH; j++) {
 			if (d_buf[i][j] != backbuf[i][j]) {
 				if (i == 0) {
 					POSITION pos = { i + 18,j };
-					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT,0);
+					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT, 0);
 				}
 				else {
 					POSITION pos = { i + 18,j };
-					printc(padd(map_pos, pos), backbuf[i+10][j], COLOR_DEFAULT,0);
+					printc(padd(map_pos, pos), backbuf[i + 10][j], COLOR_DEFAULT, 0);
 				}
 			}
 			d_buf[i][j] = backbuf[i][j];
@@ -234,15 +234,15 @@ void display_system_message(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 void display_object_info(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	project2(map, backbuf);
 	for (int i = 0; i < MAP_HEIGHT; i++) {
-		for (int j = 0; j < MAP_WIDTH-5; j++) {
+		for (int j = 0; j < MAP_WIDTH - 5; j++) {
 			if (r_buf[i][j] != backbuf[i][j]) {
 				if (j == 54) {
 					POSITION pos = { i ,j + 60 };
-					printc(padd(map_pos, pos), backbuf[i][j+5], COLOR_DEFAULT,0);
+					printc(padd(map_pos, pos), backbuf[i][j + 5], COLOR_DEFAULT, 0);
 				}
 				else {
 					POSITION pos = { i ,j + 60 };
-					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT,0);
+					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT, 0);
 				}
 			}
 			r_buf[i][j] = backbuf[i][j];
@@ -252,20 +252,20 @@ void display_object_info(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 
 void display_commands(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	project2(map, backbuf);
-	for (int i = 0; i < MAP_HEIGHT-10; i++) {
-		for (int j = 0; j < MAP_WIDTH-5; j++) {
+	for (int i = 0; i < MAP_HEIGHT - 10; i++) {
+		for (int j = 0; j < MAP_WIDTH - 5; j++) {
 			if (c_buf[i][j] != backbuf[i][j]) {
 				if (i == 0) {
-					POSITION pos = { i+18 ,j + 60 };
-					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT,0);
+					POSITION pos = { i + 18 ,j + 60 };
+					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT, 0);
 				}
 				else if (j == 54) {
 					POSITION pos = { i + 18 ,j + 60 };
-					printc(padd(map_pos, pos), backbuf[i][j + 5], COLOR_DEFAULT,0);
+					printc(padd(map_pos, pos), backbuf[i][j + 5], COLOR_DEFAULT, 0);
 				}
 				else {
-					POSITION pos = { i+18 ,j + 60 };
-					printc(padd(map_pos, pos), backbuf[i + 10][j], COLOR_DEFAULT,0);
+					POSITION pos = { i + 18 ,j + 60 };
+					printc(padd(map_pos, pos), backbuf[i + 10][j], COLOR_DEFAULT, 0);
 				}
 			}
 			c_buf[i][j] = backbuf[i][j];
@@ -307,7 +307,7 @@ void display_cursor(CURSOR cursor) {
 	else {
 		printc(padd(map_pos, prev), ch, 15, b_col[prev.row][prev.column]);
 	}
-	
+
 	frontbuf[curr.row][curr.column] = backbuf[prev.row][prev.column];
 	ch = frontbuf[curr.row][curr.column];
 	ch2 = frontbuf[curr.row + 1][curr.column];
@@ -318,8 +318,8 @@ void display_cursor(CURSOR cursor) {
 	else if (b_col[prev.row][prev.column] == 1) {
 		printc(padd(map_pos, curr), ch, 15, 0);
 	}
-	else if (cur == 1){
-		if (ch != '#' && ch2 != '#' && ch3 !='#') {
+	else if (cur == 1) {
+		if (ch != '#' && ch2 != '#' && ch3 != '#') {
 			cur_row = curr.row;
 			cur_column = curr.column;
 			cur_loc[1][4] = backbuf[curr.row][curr.column];
@@ -341,7 +341,7 @@ void display_cursor(CURSOR cursor) {
 	cur_loc[1][1] = backbuf[curr.row][curr.column];
 	unit_row = curr.row;
 	unit_column = curr.column;
-	
+
 }
 
 
@@ -351,11 +351,11 @@ void info_re(void) {
 			if (j == 54) {
 				POSITION pos = { i ,j + 60 };
 				printc(padd(map_pos, pos), r_buf[i][j + 5], COLOR_DEFAULT, 0);
-				}
+			}
 			else {
 				POSITION pos = { i ,j + 60 };
 				printc(padd(map_pos, pos), r_buf[i][j], COLOR_DEFAULT, 0);
-				}
+			}
 		}
 	}
 	hei_i = 1;
@@ -387,11 +387,11 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
 			printc2(padd(map_pos, pos), "-----------돌 지형-----------", 15, 0);
-			printc2(padd(map_pos, pos2), "내릴 명령이 없습니다.",15, 0);
+			printc2(padd(map_pos, pos2), "내릴 명령이 없습니다.", 15, 0);
 			hei_i++;
 			char r_s[100] = "Unable to perform.";
 			sys_mes();
-			
+
 		}
 		else if (cur_loc[1][1] == 'P') {
 			command_re();
@@ -401,8 +401,8 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			printc2(padd(map_pos, pos), "-----------장판-----------", 15, 0);
 			printc2(padd(map_pos, pos2), "내릴 명령이 없습니다.", 15, 0);
 			hei_i++;
-			
-		
+
+
 		}
 		else if (cur_loc[1][1] == 'B') {
 			command_re();
@@ -410,11 +410,11 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			POSITION pos = { hei_i,wid_i };
 			POSITION pos2 = { hei_c , wid_c };
 			printc2(padd(map_pos, pos), "-----------본진-----------", 15, 0);
-			printc2(padd(map_pos, pos2),"H:하베스터 생산.", 15, 0);
+			printc2(padd(map_pos, pos2), "H:하베스터 생산.", 15, 0);
 			hei_i++;
-			h_cre(map, resource);
+			h_cre(map);
 		}
-		else if(cur_loc[1][1] == ' '){
+		else if (cur_loc[1][1] == ' ') {
 			command_re();
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
@@ -423,10 +423,10 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			printc2(padd(map_pos, pos2), "내릴 명령이 없습니다.", 15, 0);
 			hei_i++;
 			char d_s[100] = "Unable to perform.             ";
-			strcpy_s(sys_message1, 100, d_s, 100);
-			sys_mes();			
+			strncpy_s(sys_message1, 100, d_s, 100);
+			sys_mes();
 		}
-		else if(cur_loc[1][1] == 'b'){
+		else if (cur_loc[1][1] == 'b') {
 			command_re();
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
@@ -436,7 +436,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			hei_i++;
 			b_cre(map);
 		}
-		else if (cur_loc[1][1] == 'E'){
+		else if (cur_loc[1][1] == 'E') {
 			command_re();
 			set = 1;
 			POSITION pos = { hei_i,wid_i };
@@ -446,7 +446,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 			hei_i++;
 			F_cre(map);
 		}
-		else if(cur_loc[1][1] == 'S'){
+		else if (cur_loc[1][1] == 'S') {
 			command_re();
 			set = 1;
 			Soldier_pos_row = unit_row;
@@ -476,7 +476,7 @@ void sel_tp(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource) {
 		info_re();
 	}
 }
-void h_select(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH],RESOURCE resource, CURSOR cursor) {
+void h_select(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH], RESOURCE resource, CURSOR cursor) {
 	if (cur_loc[1][1] == 'H') {
 		command_re();
 		set = 1;
@@ -500,57 +500,57 @@ void h_select(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH],RESOURCE resource, CURSOR
 		pos.row++;
 		printc2(padd(map_pos, pos2), "H:Harvest(수확),M:move(이동)", 15, 0);
 		hei_i += 6;
-		h_move(map,resource, cursor);
-		}
+		h_move(map, resource, cursor);
+	}
 }
 void build_list(void) {
 	command_re();
 	set = 1;
-	POSITION pos = { hei_c-1,wid_c - 15 };
-	printc2(padd(map_pos, pos), "장판(P:Plate) 숙소(D:Dormitory) 창고(G:Garage)",15,0);
+	POSITION pos = { hei_c - 1,wid_c - 15 };
+	printc2(padd(map_pos, pos), "장판(P:Plate) 숙소(D:Dormitory) 창고(G:Garage)", 15, 0);
 	POSITION pos2 = { hei_c + 1,wid_c - 15 };
 	printc2(padd(map_pos, pos2), "병영(A:Barracks) 은신처(R:Shelter)", 15, 0);
 
 }
 void h_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	char suc = '0';
-		while (suc != 'H') {
-			if (suc != 'H') {
-				if (_kbhit()) {
-					int key = _getch();
-					if (key == 'H' || key == 'h') {
-						if (spice_population_max < spice_population + 5) {
-							char h_n[100] = "Not enough population          ";
-							strcpy_s(sys_message1, 100, h_n, 100);
-							sys_mes();
-							break;
-						}
-						if (spice >= 5) {
-							char h_n2[100] = "A new harvester ready            ";
-							strcpy_s(sys_message1, 100, h_n2, 100);
-							sys_mes();
-							suc = 'H';
-							b_col[hei_h][wid_h] = 1;
-							spice -= 5;
-							map[1][hei_h][wid_h] = 'H';
-							wid_h++;
-							spice_population += 5;
-							break;
-						}
-						else if(spice < 5){
-							char h_n[100] = "Not enough spice          ";
-							strcpy_s(sys_message1, 100, h_n, 100);
-							sys_mes();
-							break;
-						}
-					}
-					else if (key == 27) {
+	while (suc != 'H') {
+		if (suc != 'H') {
+			if (_kbhit()) {
+				int key = _getch();
+				if (key == 'H' || key == 'h') {
+					if (spice_population_max < spice_population + 5) {
+						char h_n[100] = "Not enough population          ";
+						strncpy_s(sys_message1, 100, h_n, 100);
+						sys_mes();
 						break;
 					}
+					if (spice >= 5) {
+						char h_n2[100] = "A new harvester ready            ";
+						strncpy_s(sys_message1, 100, h_n2, 100);
+						sys_mes();
+						suc = 'H';
+						b_col[hei_h][wid_h] = 1;
+						spice -= 5;
+						map[1][hei_h][wid_h] = 'H';
+						wid_h++;
+						spice_population += 5;
+						break;
+					}
+					else if (spice < 5) {
+						char h_n[100] = "Not enough spice          ";
+						strncpy_s(sys_message1, 100, h_n, 100);
+						sys_mes();
+						break;
+					}
+				}
+				else if (key == 27) {
+					break;
 				}
 			}
 		}
 	}
+}
 void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	char suc = '0';
 	int b_row = unit_row;
@@ -563,13 +563,13 @@ void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 					if (spice >= 1) {
 						if (spice_population_max < spice_population + 1) {
 							char h_n[100] = "Not enough population          ";
-							strcpy_s(sys_message1, 100, h_n, 100);
+							strncpy_s(sys_message1, 100, h_n, 100);
 							sys_mes();
 							break;
 						}
 						else {
 							char h_n2[100] = "A new Soldier ready            ";
-							strcpy_s(sys_message1, 100, h_n2, 100);
+							strncpy_s(sys_message1, 100, h_n2, 100);
 							sys_mes();
 							suc = 'S';
 							b_col[b_row - 2][b_column + 2] = 1;
@@ -582,7 +582,7 @@ void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 					}
 					else if (spice < 1) {
 						char h_n[100] = "Not enough spice          ";
-						strcpy_s(sys_message1, 100, h_n, 100);
+						strncpy_s(sys_message1, 100, h_n, 100);
 						sys_mes();
 						break;
 					}
@@ -606,13 +606,13 @@ void F_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 					if (spice >= 5) {
 						if (spice_population_max < spice_population + 2) {
 							char h_n[100] = "Not enough population          ";
-							strcpy_s(sys_message1, 100, h_n, 100);
+							strncpy_s(sys_message1, 100, h_n, 100);
 							sys_mes();
 							break;
 						}
 						else {
 							char h_n2[100] = "A new Fremen ready            ";
-							strcpy_s(sys_message1, 100, h_n2, 100);
+							strncpy_s(sys_message1, 100, h_n2, 100);
 							sys_mes();
 							suc = 'F';
 							b_col[F_row - 2][F_column + 2] = 1;
@@ -625,7 +625,7 @@ void F_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 					}
 					else if (spice < 5) {
 						char h_n[100] = "Not enough spice          ";
-						strcpy_s(sys_message1, 100, h_n, 100);
+						strncpy_s(sys_message1, 100, h_n, 100);
 						sys_mes();
 						break;
 					}
@@ -645,12 +645,12 @@ void sys_mes(void) {
 
 	ret1 = strncmp(sys_message1, sys_copy1, 100);
 
-	POSITION pos1 = { hei_s-1,wid_s };
+	POSITION pos1 = { hei_s - 1,wid_s };
 	printc2(padd(map_pos, pos1), sys_message1, 15, 0);
 	if (ret1 != 0) {
 		POSITION pos1 = { hei_s - 3,wid_s };
 		printc2(padd(map_pos, pos1), sys_copy1, 15, 0);
-		strcpy_s(sys_copy1, 100, sys_message1, 100);
+		strncpy_s(sys_copy1, 100, sys_message1, 100);
 	}
 	else if (ret1 == 0) {
 		POSITION pos1 = { hei_s - 3,wid_s };
@@ -678,12 +678,12 @@ void build_B(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	build = 4;
 	cur = 1;
 }
-void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
+void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	if (cur_loc[1][1] == ' ') {
 		if (build == 1) {
 			if (spice >= 1) {
 				char b_s[100] = "장판 건설완료!                   ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				POSITION pos = { cur_row,cur_column };
 				map[1][cur_row][cur_column] = 'P';
@@ -698,7 +698,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 			}
 			else if (spice < 1) {
 				char b_s[100] = "스파이스 부족                     ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				cur = 0;
 			}
@@ -708,7 +708,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 		if (build == 2) {
 			if (spice >= 2) {
 				char b_s[100] = "숙소 건설완료!                   ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				POSITION pos = { cur_row,cur_column };
 				map[1][cur_row][cur_column] = 'D';
@@ -724,7 +724,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 			}
 			else if (spice < 2) {
 				char b_s[100] = "스파이스 부족                     ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				cur = 0;
 			}
@@ -732,7 +732,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 		if (build == 3) {
 			if (spice >= 4) {
 				char b_s[100] = "창고 건설완료!                   ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				POSITION pos = { cur_row,cur_column };
 				map[1][cur_row][cur_column] = 'G';
@@ -748,7 +748,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 			}
 			else if (spice < 4) {
 				char b_s[100] = "스파이스 부족                     ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				cur = 0;
 			}
@@ -756,7 +756,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 		if (build == 4) {
 			if (spice >= 4) {
 				char b_s[100] = "병영 건설완료!                   ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				POSITION pos = { cur_row,cur_column };
 				map[1][cur_row][cur_column] = 'b';
@@ -771,7 +771,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 			}
 			else if (spice < 4) {
 				char b_s[100] = "스파이스 부족                     ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				cur = 0;
 			}
@@ -779,7 +779,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 		if (build == 5) {
 			if (spice >= 5) {
 				char b_s[100] = "은신처 건설완료!                   ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				POSITION pos = { cur_row,cur_column };
 				map[1][cur_row][cur_column] = 'E';
@@ -794,7 +794,7 @@ void tower_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]){
 			}
 			else if (spice < 5) {
 				char b_s[100] = "스파이스 부족                     ";
-				strcpy_s(sys_message1, 100, b_s, 100);
+				strncpy_s(sys_message1, 100, b_s, 100);
 				sys_mes();
 				cur = 0;
 			}
@@ -854,6 +854,6 @@ void F_move(void) {
 		cur = 0;
 		f_m = 1;
 	}
-	
+
 }
 
