@@ -7,6 +7,7 @@
 #include <conio.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 /* ================= system parameters =================== */
 #define TICK 10		// time unit(ms)
@@ -19,7 +20,7 @@
 /* ================= 위치와 방향 =================== */
 // 맵에서 위치를 나타내는 구조체
 typedef struct {
-	int row,column;
+	int row, column;
 } POSITION;
 
 // 커서 위치
@@ -61,8 +62,8 @@ inline POSITION padd(POSITION p1, POSITION p2) {
 	POSITION p = { p1.row + p2.row, p1.column + p2.column };
 	return p;
 }
-inline root(int x, int y) {
-	int r;
+inline double root(double x, double y) {
+	double r;
 	x = x * x;
 	y = y * y;
 	r = x + y;
@@ -106,7 +107,7 @@ typedef struct {
 	POSITION dest;		// 목적지(destination)
 	char repr;			// 화면에 표시할 문자(representation)
 	int move_period;	// '몇 ms마다 한 칸 움직이는지'를 뜻함
-	int speed;	
+	int speed;
 	int next_move_time;	// 다음에 움직일 시간
 	int hp; // 체력
 	int attack; // 공격력
