@@ -45,4 +45,5 @@ void b_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void F_cre(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
 void F_move(void);
 void soldier_move(void);
+
 #endif
